@@ -16,6 +16,7 @@ import AlertBox from '../components/AlertBox';
 import PrintView from '../views/PrintView';
 import { PrintProvider } from '../context/PrintContext';
 import { viewTitleID } from '../utils/accessibility';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 const { smallScreenBreakpoint } = config;
 
@@ -180,11 +181,13 @@ const DefaultLayout = (props) => {
           tabIndex="-1"
           style={styles.map}
         >
-          <MapView
-            sidebarHidden={sidebarHidden}
-            toggleSidebar={toggleSidebar}
-            isMobile={!!isMobile}
-          />
+          <ErrorBoundary>
+            <MapView
+              sidebarHidden={sidebarHidden}
+              toggleSidebar={toggleSidebar}
+              isMobile={!!isMobile}
+            />
+          </ErrorBoundary>
         </div>
       </div>
 

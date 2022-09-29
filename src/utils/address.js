@@ -1,18 +1,8 @@
 /* eslint-disable prefer-destructuring */
+import { useCallback } from 'react';
+import useLocaleText from './useLocaleText';
 import { uppercaseFirst } from '.';
-import config from '../../config';
 
-// Gets translated municipality from configuration
-const getTranslatedMunicipality = (address, getLocaleText) => {
-  if (!address || !getLocaleText) {
-    return null;
-  }
-  let municipality = getLocaleText(config.municipality)[address.street.municipality];
-  if (municipality && typeof municipality === 'string') {
-    municipality = municipality.toLowerCase(); // Transform to lowercase
-  }
-  return municipality;
-};
 
 export const addressMatchParamsToFetchOptions = (match) => {
   if (!match) {
@@ -44,52 +34,32 @@ export const addressMatchParamsToFetchOptions = (match) => {
   return data;
 };
 
-export const getAddressNavigatorParamsConnector = (getLocaleText, locale) => (address) => {
-  if (!address || !address.number || !address.street.name || !address.street.municipality) {
-    return null;
-  }
-  if (typeof getLocaleText !== 'function') {
-    throw Error('getAddressNavigatorParams requires getLocaleText function');
-  }
-  if (Object.keys(config.municipality).indexOf(locale) === -1) {
-    throw Error(`getAddressNavigatorParams locale parameter must be one of ${Object.keys(config.municipality).toString()}`);
-  }
-  let municipality = config.municipality[locale][address.street.municipality];
-  if (municipality && typeof municipality === 'string') {
-    municipality = municipality.toLowerCase(); // Transform to lowercase
-  }
+export const getAddressNavigatorParamsConnector = (address) => {
+  const nameObject = address.name || address.full_name;
+  // TODO: why address endpoint returns different municipality object than search endpoint?
+  const municipality = address.municipality.id || address.municipality.name.fi;
 
-  const nStart = address.number;
-  const nEnd = address.number_end ? `-${address.number_end}` : '';
-  const letter = address.letter ? `-${address.letter}` : '';
-  const fullNumber = `${nStart}${nEnd}${letter}`;
-  const data = {
-    municipality,
-    street: getLocaleText(address.street.name),
-    number: fullNumber,
+  return {
+    municipality: municipality.toLowerCase(),
+    name: nameObject.fi, // Use Finnish value to have same url for all languages
   };
-
-  if (address.number_end) {
-    data.number_end = address.number_end;
-  }
-
-  return data;
 };
 
 export const getAddressText = (address, getLocaleText, showPostalCode = true) => {
-  if (!address || !address.number || !address.street.name || !address.street.municipality) {
-    return '';
-  }
   if (typeof getLocaleText !== 'function') {
     throw Error('getAddressText requires getLocaleText function');
   }
-  const nStart = address.number;
-  const nEnd = address.number_end ? `-${address.number_end}` : '';
-  const letter = address.letter ? address.letter : '';
-  const fullNumber = `${nStart}${nEnd}${letter}`;
-  const municipality = getTranslatedMunicipality(address, getLocaleText);
-  const postalCode = showPostalCode && address.postal_code ? ` ${address.postal_code}` : '';
-  return `${getLocaleText(address.street.name)} ${fullNumber},${postalCode} ${uppercaseFirst(municipality)}`;
+
+  if (address) {
+    const nameObject = address.full_name || address.name;
+    if (!nameObject) throw Error('getAddressText received address with no name');
+
+    const addressName = getLocaleText(nameObject);
+    const municipality = getLocaleText(address.municipality.name);
+    const postalCode = showPostalCode && address.postal_code_area ? ` ${address.postal_code_area.postal_code}` : '';
+    return `${addressName}, ${postalCode} ${municipality}`;
+  }
+  return '';
 };
 
 export const getAddressFromUnit = (unit, getLocaleText, intl) => {
@@ -97,14 +67,21 @@ export const getAddressFromUnit = (unit, getLocaleText, intl) => {
     return '';
   }
   if (!unit.address_zip || !unit.municipality) {
-    return `${getLocaleText(unit.street_address)}`;
+    return typeof unit.street_address === 'string'
+      ? unit.street_address
+      : `${getLocaleText(unit.street_address)}`;
   }
   const { address_zip: addressZip } = unit;
   const postalCode = addressZip ? `, ${addressZip}` : '';
   const city = intl.formatMessage({
     id: `settings.city.${unit.municipality}`,
-    defaultMessage: ' ',
+    defaultMessage: typeof unit.municipality === 'string' ? uppercaseFirst(unit.municipality) : ' ',
   });
 
-  return `${getLocaleText(unit.street_address)}${postalCode} ${city}`;
+  return `${typeof unit.street_address === 'string' ? unit.street_address : getLocaleText(unit.street_address)}${postalCode} ${city}`;
 };
+
+export const useNavigationParams = () => useCallback(
+  address => getAddressNavigatorParamsConnector(address),
+  [],
+);

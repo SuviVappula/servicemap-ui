@@ -1,52 +1,64 @@
-import config from '../../../config';
+import ServiceMapAPI from '../../utils/newFetch/ServiceMapAPI';
 
-// TODO: need city (and locale?) parameters to new search fetch
+const createSuggestions = (
+  query,
+  abortController,
+  getLocaleText,
+  citySettings,
+) => async () => {
+  const smAPI = new ServiceMapAPI();
+  smAPI.setAbortController(abortController);
 
-const createSuggestions = async (query, signal, locale) => {
-  const data = await Promise.all([
-    fetch(`${config.serviceMapAPI.root}/suggestion/?q=${query}&language=${locale}`, { signal })
-      .then((res) => {
-        if (res.status === 200) {
-          return res.json();
-        }
-        return 'error';
-      })
-      .catch((res) => {
-        console.log('error:', res);
-        return 'error';
-      }),
-    fetch(`${config.serviceMapAPI.root}/search/?input=${query}&language=${locale}&page=1&page_size=3&type=address`, { signal })
-      .then((res) => {
-        if (res.status === 200) {
-          return res.json();
-        }
-        return 'error';
-      })
-      .catch((res) => {
-        console.log('error:', res);
-        return 'error';
-      }),
-  ]);
+  const unitLimit = 10;
+  const serviceLimit = 10;
+  const addressLimit = 1;
+  const servicenodeLimit = 10;
+  const pageSize = unitLimit + serviceLimit + addressLimit + servicenodeLimit;
 
-  if (data[0] === 'error' && data[1] === 'error') {
-    return 'error';
-  }
+  const additionalOptions = {
+    page_size: pageSize,
+    unit_limit: unitLimit,
+    service_limit: serviceLimit,
+    address_limit: addressLimit,
+    servicenode_limit: servicenodeLimit,
+    municipality: citySettings.join(','),
+  };
 
-  let suggestions = [];
-  // Handle address fetch results
-  if (data[1] !== 'error' && data[1].results && data[1].results.length) {
-    suggestions = [...data[1].results];
-  }
-  // Handle suggestion API results
-  if (data[0] !== 'error' && data[0].suggestions && data[0].suggestions.length) {
-    data[0].suggestions.forEach((element) => {
-      if (!element.object_type) {
-        element.object_type = 'suggestion';
+  const results = await smAPI.searchSuggestions(query, additionalOptions);
+
+  let filteredResults = results;
+
+  // Filter services with city settings
+  if (citySettings.length) {
+    filteredResults = filteredResults.filter((result) => {
+      if (result.object_type === 'service' || result.object_type === 'servicenode') {
+        let totalResultCount = 0;
+        citySettings.forEach((city) => {
+          if (result.unit_count?.municipality[city]) {
+            totalResultCount += result.unit_count.municipality[city];
+          }
+        });
+        if (totalResultCount === 0) return false;
       }
+      return true;
     });
-    suggestions = [...suggestions, ...data[0].suggestions];
   }
-  return suggestions;
+
+
+  // Handle address results
+  filteredResults.forEach((item) => {
+    if (item.object_type === 'address') {
+      if (getLocaleText(item.name).toLowerCase() !== query.toLowerCase()) {
+        item.name = item.street.name;
+      } else {
+        const exactAddress = { ...item };
+        exactAddress.isExact = true;
+        filteredResults.push(exactAddress);
+      }
+    }
+  });
+
+  return filteredResults;
 };
 
 export default createSuggestions;

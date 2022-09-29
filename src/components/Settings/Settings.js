@@ -13,7 +13,8 @@ import {
   Radio,
   FormLabel,
   FormControl,
-} from '@material-ui/core';
+} from '@mui/material';
+import { visuallyHidden } from '@mui/utils';
 import SettingsUtility from '../../utils/settings';
 import Container from '../Container';
 import {
@@ -76,8 +77,8 @@ class Settings extends React.Component {
     });
 
     setTimeout(() => {
-      const settings = document.getElementsByClassName('SettingsTitle')[0];
-      settings.firstChild.focus();
+      const settingsTitle = document.getElementsByClassName('TitleText')[0];
+      settingsTitle.focus();
     }, 1);
   }
 
@@ -528,7 +529,10 @@ class Settings extends React.Component {
                         )}
                       label={(
                         <>
-                          <SMIcon icon={`icon-icon-coat-of-arms-${key}`} />
+                          {key === 'kirkkonummi'
+                            ? getIcon('kirkkonummiIcon', { className: classes.icon })
+                            : <SMIcon className={classes.icon} icon={`icon-icon-coat-of-arms-${key}`} />
+                          }
                           <FormattedMessage id={`settings.city.${key}`} />
                         </>
                         )}
@@ -692,9 +696,9 @@ class Settings extends React.Component {
     return (
       <div id="SettingsContainer" className={`${classes.container}`} ref={this.dialogRef} role="dialog">
         {/* Empty element that makes keyboard focus loop in dialog */}
-        <Typography variant="srOnly" aria-hidden tabIndex="0" onFocus={() => this.focusToLastElement()} />
+        <Typography style={visuallyHidden} aria-hidden tabIndex={0} onFocus={() => this.focusToLastElement()} />
 
-        <TitleBar id="SettingsTitle" className="SettingsTitle" titleComponent="h2" title={<FormattedMessage id={`settings.${settingsPage}.long`} />} />
+        <TitleBar id="SettingsTitle" titleComponent="h2" title={<FormattedMessage id={`settings.${settingsPage}.long`} />} />
         <>
           {showAlert && (
             this.renderSaveAlert()
@@ -709,13 +713,12 @@ class Settings extends React.Component {
             <SMButton
               small
               role="button"
-              disabled={!settingsHaveChanged}
               onClick={() => this.saveSettings(this.closeButtonRef.current)}
               messageID="general.save.changes"
               color="primary"
             />
             <SMButton
-              innerRef={this.closeButtonRef}
+              passingRef={this.closeButtonRef}
               aria-label={intl.formatMessage({ id: 'general.closeSettings' })}
               small
               role="button"
@@ -724,7 +727,7 @@ class Settings extends React.Component {
             />
           </Container>
 
-          <Typography aria-live="polite" variant="srOnly">
+          <Typography aria-live="polite" style={visuallyHidden}>
             {settingsHaveChanged && (
               <FormattedMessage id="settings.aria.changed" />
             )}
@@ -734,7 +737,7 @@ class Settings extends React.Component {
           </Typography>
         </>
         {/* Empty element that makes keyboard focus loop in dialog */}
-        <Typography variant="srOnly" aria-hidden tabIndex="0" onFocus={() => this.focusToFirstElement()} />
+        <Typography style={visuallyHidden} aria-hidden tabIndex={0} onFocus={() => this.focusToFirstElement()} />
       </div>
     );
   }

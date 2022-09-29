@@ -42,8 +42,16 @@ export default theme => ({
     borderBottom: '1px solid rgba(0,0,0,0.2)',
   },
   link: {
-    color: '#0000EE',
+    color: theme.palette.link.main,
     textDecoration: 'underline',
+  },
+  linkButton: {
+    color: 'white',
+    textTransform: 'none',
+  },
+  linkButtonIcon: {
+    fontSize: 24,
+    marginLeft: theme.spacing(1.5),
   },
   left: {
     textAlign: 'left',
@@ -88,7 +96,7 @@ export default theme => ({
   imageCaption: {
     width: '100%',
     minHeight: 31,
-    fontSize: 12,
+    fontSize: '0.75rem',
     lineHeight: '15px',
     position: 'absolute',
     display: 'flex',
@@ -113,7 +121,7 @@ export default theme => ({
     alignItems: 'end',
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
-    marginBottom: theme.spacing(1),
+    marginTop: theme.spacing(1),
   },
   feedbackButton: {
     marginLeft: theme.spacing(2),
@@ -123,21 +131,30 @@ export default theme => ({
     marginLeft: theme.spacing(2),
   },
   accordionItem: {
+    padding: 0,
     paddingLeft: theme.spacing(7),
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(3),
   },
   accordionRoot: {
-    minHeight: 32,
+    height: 32,
+    marginBottom: theme.spacing(1),
   },
   accordionSummaryRoot: {
     height: 32,
     minHeight: 32,
   },
-  accordionDetailsRoot: {
-    paddingBottom: 0,
+  accordionContaianer: {
+    padding: theme.spacing(2),
+    paddingBottom: theme.spacing(1),
+    paddingTop: 0,
+  },
+  accessibilityLink: {
+    paddingTop: theme.spacing(1),
+    color: theme.palette.link.main,
   },
   callInfoText: {
     whiteSpace: 'pre-line',
+  },
+  subgroupItem: {
+    marginBottom: theme.spacing(2),
   },
 });

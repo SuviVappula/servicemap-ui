@@ -32,11 +32,38 @@ export default theme => ({
     textAlign: 'left',
   },
   areaLink: {
+    color: theme.palette.link.main,
     textDecoration: 'underline',
     marginBottom: theme.spacing(1),
     marginTop: theme.spacing(1),
     '&:hover': {
       opacity: '0.7',
     },
+  },
+  simpleItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'start',
+    paddingLeft: theme.spacing(3),
+    paddingTop: theme.spacing(1.5),
+    paddingBottom: theme.spacing(1.5),
+  },
+  simpleTitle: {
+    marginBottom: theme.spacing(0.5),
+  },
+  itemTextContainer: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  boldText: {
+    fontWeight: 'bold',
+  },
+  areaIcon: {
+    fontSize: 20,
+    marginLeft: 0,
+    marginRight: theme.spacing(2),
+  },
+  divider: {
+    listStyleType: 'none',
   },
 });

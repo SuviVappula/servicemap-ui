@@ -1,13 +1,13 @@
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
+import fetchSearchResults from '../../redux/actions/search';
 import DivisionView from './DivisionView';
-import { fetchUnits } from '../../redux/actions/unit';
 import { setHighlightedDistrict } from '../../redux/actions/district';
 import { getHighlightedDistrict } from '../../redux/selectors/district';
 
 const mapStateToProps = (state) => {
   const { mapRef } = state;
-  const map = mapRef && mapRef.leafletElement;
+  const map = mapRef;
   const highlightedDistrict = getHighlightedDistrict(state);
   return {
     highlightedDistrict,
@@ -18,7 +18,7 @@ const mapStateToProps = (state) => {
 export default withRouter(connect(
   mapStateToProps,
   {
-    fetchUnits,
+    fetchSearchResults,
     setHighlightedDistrict,
   },
 )(DivisionView));

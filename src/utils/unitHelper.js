@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import { useSelector } from 'react-redux';
 import { drawUnitIcon } from '../views/MapView/utils/drawIcon';
 import isClient, { uppercaseFirst } from '.';
 import SettingsUtility from './settings';
@@ -139,9 +140,7 @@ class UnitHelper {
     const id = typeof unit === 'number' ? unit : unit.id;
     const embeded = isEmbed();
     if (embeded) {
-      const { origin } = window.location;
-      const path = navigator.generatePath('unit', { id });
-      window.open(`${origin}${path}`);
+      navigator.setParameter('selectedUnit', unit.id);
       return;
     }
     const action = paths.unit.regex.test(window.location.href)
@@ -169,5 +168,7 @@ class UnitHelper {
     return contractText;
   }
 }
+
+export const useSelectedUnit = () => useSelector(state => state.selectedUnit.unit.data);
 
 export default UnitHelper;

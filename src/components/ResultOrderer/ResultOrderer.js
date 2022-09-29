@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import {
   FormControl, Select, Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { useAcccessibilitySettings } from '../../utils/settings';
 
 const allowedDirections = [
@@ -13,14 +13,14 @@ const allowedDirections = [
 ];
 
 const allowedOrders = [
-  'match',
+  // 'match',
   'alphabetical',
   'accessibility',
   'distance',
 ];
 
 const allowedInitialValues = [
-  'match-desc',
+  // 'match-desc',
   'alphabetical-desc',
   'alphabetical-asc',
   'accessibility-desc',
@@ -77,16 +77,17 @@ const ResultOrderer = ({
   return (
     <form className={classes.root} autoComplete="off">
       <FormControl className={classes.formControl}>
-        <Typography color="inherit" variant="caption" className={classes.inputLabel}>
+        <Typography color="inherit" variant="caption" component="label" for="result-sorter" className={classes.inputLabel}>
           <FormattedMessage id="sorting.label" />
         </Typography>
         <Select
           disabled={disabled}
           className={classes.select}
           native
+          variant="standard"
           value={`${order}-${direction}`}
           onChange={defaultHandleChange}
-          classes={{ select: classes.elementFocus }}
+          classes={{ select: classes.selectElement }}
           inputProps={{
             name: 'result-sorter',
             id: 'result-sorter',
@@ -96,7 +97,7 @@ const ResultOrderer = ({
             className: `${classes.input}`,
           }}
         >
-          <option className={classes.black} value="match-desc">{intl.formatMessage({ id: 'sorting.match.desc' })}</option>
+          {/* <option className={classes.black} value="match-desc">{intl.formatMessage({ id: 'sorting.match.desc' })}</option> */}
           <option className={classes.black} value="alphabetical-desc">{intl.formatMessage({ id: 'sorting.alphabetical.desc' })}</option>
           <option className={classes.black} value="alphabetical-asc">{intl.formatMessage({ id: 'sorting.alphabetical.asc' })}</option>
           <option className={classes.black} value="accessibility-desc">{intl.formatMessage({ id: 'sorting.accessibility.desc' })}</option>

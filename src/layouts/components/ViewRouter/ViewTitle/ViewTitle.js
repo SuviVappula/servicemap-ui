@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Typography, RootRef } from '@material-ui/core';
+import { visuallyHidden } from '@mui/utils';
+import { Typography } from '@mui/material';
 import { viewTitleID } from '../../../../utils/accessibility';
 
 class ViewTitle extends React.Component {
@@ -25,9 +26,20 @@ class ViewTitle extends React.Component {
       }
     } else {
       actionSetInitialLoad();
-      // Focus to site title on first load
+      // If cookiehub banner is visible prevent focusing
+      let shouldFocus = true;
+      try {
+        const chDialog = document.querySelectorAll('section.ch2 div[role="dialog"]');
+        if (chDialog?.length > 0) {
+          chDialog.forEach((v) => { shouldFocus = shouldFocus && v.style.display === 'none'; });
+        }
+      } catch (e) {
+        console.warn('Error while attempting to figure out if cookiehub banner exists');
+      }
+
+      // Focus to site title on first load if cookihub banner is hidden
       const appTitle = document.getElementById('app-title');
-      if (appTitle) {
+      if (appTitle && shouldFocus) {
         appTitle.focus();
       }
     }
@@ -44,11 +56,9 @@ class ViewTitle extends React.Component {
     }
 
     return (
-      <RootRef rootRef={this.titleRef}>
-        <Typography id={viewTitleID} variant="srOnly" component="h2" tabIndex="-1">
-          <FormattedMessage id={message + type} />
-        </Typography>
-      </RootRef>
+      <Typography id={viewTitleID} style={visuallyHidden} component="h2" tabIndex={-1} ref={this.titleRef}>
+        <FormattedMessage id={message + type} />
+      </Typography>
     );
   }
 }

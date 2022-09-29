@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import {
   Typography, Divider, Button,
-} from '@material-ui/core';
-import { ArrowUpward } from '@material-ui/icons';
+} from '@mui/material';
+import { FormattedMessage } from 'react-intl';
 import BoldedText from '../../BoldedText';
 import { keyboardHandler } from '../../../utils';
-import useMobileStatus from '../../../utils/isMobile';
 
 const SuggestionItem = (props) => {
   const {
     classes,
+    className,
     divider,
     text,
     handleItemClick,
-    handleArrowClick,
+    handleRemoveClick,
     icon,
     selected,
     subtitle,
@@ -27,7 +27,6 @@ const SuggestionItem = (props) => {
   } = props;
 
   const [mouseDown, setMouseDown] = useState(false);
-  const isMobile = useMobileStatus();
   const onClick = handleItemClick
     ? (e) => {
       e.preventDefault();
@@ -47,11 +46,12 @@ const SuggestionItem = (props) => {
           selected: classes.itemFocus,
         }}
         selected={selected}
-        className="suggestion"
+        className={`suggestion ${className || ''}`}
         onMouseDown={onClick}
         onMouseUp={() => setMouseDown(false)}
         onKeyDown={keyboardHandler(onClick, ['space', 'enter'])}
         onKeyUp={() => setMouseDown(false)}
+        onClick={() => handleItemClick()}
         role={role || 'link'}
         aria-label={`${text} ${subtitle || ''}`}
         id={id}
@@ -70,6 +70,7 @@ const SuggestionItem = (props) => {
 
             <Typography
               aria-hidden
+              className={handleRemoveClick ? classes.historyText : ''}
               variant="body2"
             >
               {
@@ -97,28 +98,26 @@ const SuggestionItem = (props) => {
           }
           </ListItemText>
         </span>
-        {
-          isMobile
-          && handleArrowClick
-          && (
-            <Button
-              aria-hidden
-              className={`${classes.suggestIcon}`}
-              classes={{
-                label: classes.suggestIconLabel,
-              }}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const value = text.props ? text.props.text : text;
-                handleArrowClick(value);
-                return false;
-              }}
-            >
-              <ArrowUpward style={{ transform: 'rotate(-48deg)' }} />
-            </Button>
-          )
-        }
+        {handleRemoveClick && (
+          <Button
+            aria-hidden
+            className={`${classes.suggestIcon}`}
+            classes={{
+              label: classes.suggestIconLabel,
+            }}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const value = text.props ? text.props.text : text;
+              handleRemoveClick(value);
+              return false;
+            }}
+          >
+            <Typography variant="caption" className={classes.removeText}>
+              <FormattedMessage id="search.removeSuggestion" />
+            </Typography>
+          </Button>
+        )}
       </ListItem>
       {divider ? (
         <li aria-hidden>
@@ -135,7 +134,7 @@ SuggestionItem.propTypes = {
   classes: PropTypes.objectOf(PropTypes.any).isRequired,
   text: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
   icon: PropTypes.objectOf(PropTypes.any),
-  handleArrowClick: PropTypes.func,
+  handleRemoveClick: PropTypes.func,
   handleItemClick: PropTypes.func,
   divider: PropTypes.bool,
   selected: PropTypes.bool,
@@ -143,16 +142,18 @@ SuggestionItem.propTypes = {
   query: PropTypes.string,
   role: PropTypes.string,
   id: PropTypes.string,
+  className: PropTypes.string,
 };
 
 SuggestionItem.defaultProps = {
   icon: null,
-  handleArrowClick: null,
   handleItemClick: null,
+  handleRemoveClick: null,
   divider: false,
   selected: false,
   subtitle: null,
   query: null,
   role: null,
   id: null,
+  className: null,
 };

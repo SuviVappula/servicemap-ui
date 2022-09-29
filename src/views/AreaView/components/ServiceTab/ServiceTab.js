@@ -4,16 +4,26 @@ import {
   List,
   ListItem,
   Typography,
-  RadioGroup,
   Divider,
-} from '@material-ui/core';
+} from '@mui/material';
+import { visuallyHidden } from '@mui/utils';
 import { FormattedMessage } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
-import SMAccordion from '../../../../components/SMAccordion';
-import { fetchDistrictGeometry, handleOpenItems, setSelectedDistrictType } from '../../../../redux/actions/district';
+import {
+  fetchDistrictGeometry,
+  handleOpenItems,
+  setParkingUnits,
+  setSelectedDistrictType,
+  setSelectedParkingAreas,
+} from '../../../../redux/actions/district';
 import DistrictUnitList from '../DistrictUnitList';
 import DistrictToggleButton from '../DistrictToggleButton';
-import { dataStructure } from '../../utils/districtDataHelper';
+import { dataStructure, getDistrictCategory } from '../../utils/districtDataHelper';
+import DistrictAreaList from '../DistrictAreaList';
+import ParkingAreaList from '../ParkingAreaList';
+import {
+  SMAccordion,
+} from '../../../../components';
 
 const ServiceTab = (props) => {
   const {
@@ -25,16 +35,26 @@ const ServiceTab = (props) => {
   const dispatch = useDispatch();
   const districtsFetching = useSelector(state => state.districts.districtsFetching);
   const selectedDistrictType = useSelector(state => state.districts.selectedDistrictType);
+  const selectedParkingAreas = useSelector(state => state.districts.selectedParkingAreas);
+  const parkingUnits = useSelector(state => state.districts.parkingUnits);
   const selectedCategory = dataStructure.find(
-    data => data.districts.includes(selectedDistrictType),
+    data => data.districts.some(obj => obj.id === selectedDistrictType),
   )?.id;
 
   const handleRadioChange = (district) => {
     if (selectedDistrictType === district.id) {
       dispatch(setSelectedDistrictType(null));
     } else {
+      if (getDistrictCategory(district.name) !== 'parking') {
+        if (selectedParkingAreas.length) {
+          dispatch(setSelectedParkingAreas([]));
+        }
+        if (parkingUnits.length) {
+          dispatch(setParkingUnits([]));
+        }
+      }
       if (!district.data.some(obj => obj.boundary)) {
-        dispatch(fetchDistrictGeometry(district.name));
+        dispatch(fetchDistrictGeometry(district.name, district.period));
       }
       dispatch(setSelectedDistrictType(district.id));
     }
@@ -63,34 +83,59 @@ const ServiceTab = (props) => {
   );
 
 
-  const renderDistrictList = districList => (
-    <List disablePadding>
-      {districList.map((district, i) => (
-        <Fragment key={district.id}>
-          <ListItem
-            key={district.id}
-            divider={districList.length !== i + 1}
-            className={`${classes.listItem} ${classes.areaItem} ${district.id}`}
-          >
-            {renderDistrictItem(district)}
-          </ListItem>
+  const renderDistrictList = (districList) => {
+    const listDistrictAreas = ['rescue_area', 'rescue_district', 'rescue_sub_district'].includes(selectedDistrictType);
+    const DistrictList = listDistrictAreas ? DistrictAreaList : DistrictUnitList;
+    return (
+      <List className="districtList" disablePadding>
+        {districList.map((district, i) => (
+          <Fragment key={district.id}>
+            <ListItem
+              key={district.id}
+              divider={districList.length !== i + 1}
+              className={`${classes.listItem} ${classes.areaItem} ${district.id}`}
+            >
+              {renderDistrictItem(district)}
+            </ListItem>
 
-          {/* Service list */}
-          {selectedDistrictType === district.id && (
-            <li>
-              <DistrictUnitList
-                district={district}
-                selectedAddress={selectedAddress}
-              />
-            </li>
-          )}
-        </Fragment>
-      ))}
-    </List>
-  );
+            {/* Service list */}
+            {selectedDistrictType === district.id && (
+              <li>
+                <DistrictList
+                  district={district}
+                  selectedAddress={selectedAddress}
+                />
+              </li>
+            )}
+          </Fragment>
+        ))}
+      </List>
+    );
+  };
+
+
+  const renderParkingAreaSelection = (item) => { // Custom implementation for parking areas
+    const districList = districtData.filter(obj => item.districts.some(
+      district => obj.id.includes(district.id),
+    ));
+    const parkingAreas = districList.filter(obj => !obj.id.includes('parking_area'));
+    const parkingSpaces = districList.filter(obj => obj.id.includes('parking_area') && obj.id !== 'parking_area0');
+    return (
+      <>
+        {renderDistrictList(parkingAreas)}
+        <div className={classes.subtitle}>
+          <Typography><FormattedMessage id="area.list.parkingSpaces" /></Typography>
+        </div>
+        <ParkingAreaList areas={parkingSpaces} />
+      </>
+    );
+  };
 
 
   const renderCollapseContent = (item) => {
+    if (item.id === 'parking') {
+      return renderParkingAreaSelection(item);
+    }
     if (item.subCategories) {
       return item.subCategories.map((obj) => {
         const districList = districtData.filter(i => obj.districts.includes(i.name));
@@ -105,15 +150,18 @@ const ServiceTab = (props) => {
       });
     }
 
-    const districList = districtData.filter(i => item.districts.includes(i.name));
+    const districList = districtData.filter(
+      i => item.districts.some(district => district.id === i.name),
+    );
     return renderDistrictList(districList);
   };
 
 
   const renderCategoryItem = (item) => {
     const defaultExpanded = initialOpenItems.includes(item.id) || selectedCategory === item.id;
+    const ariaHidden = item.id === 'parking';
     return (
-      <ListItem key={item.titleID} className={classes.listItem} divider>
+      <ListItem aria-hidden={ariaHidden} key={item.titleID} className={classes.listItem} divider>
         <SMAccordion
           className={classes.accodrion}
           onOpen={() => dispatch(handleOpenItems(item.id))}
@@ -146,7 +194,7 @@ const ServiceTab = (props) => {
 
   return (
     <div>
-      <Typography variant="srOnly" component="h3">
+      <Typography style={visuallyHidden} component="h3">
         <FormattedMessage id="area.list" />
       </Typography>
       <List>

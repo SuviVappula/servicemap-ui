@@ -3,11 +3,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
   List, Typography, Divider,
-} from '@material-ui/core';
+} from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import UnitItem from '../../ListItems/UnitItem';
 import ServiceItem from '../../ListItems/ServiceItem';
 import AddressItem from '../../ListItems/AddressItem';
+import EventItem from '../../ListItems/EventItem';
 
 class ResultList extends React.Component {
   // Update only when data changes
@@ -18,7 +19,15 @@ class ResultList extends React.Component {
 
   render() {
     const {
-      beforeList, classes, data, customComponent, listId, resultCount, title, titleComponent,
+      beforeList,
+      classes,
+      data,
+      customComponent,
+      listId,
+      resultCount,
+      title,
+      titleComponent,
+      embeddedList,
     } = this.props;
 
     return (
@@ -34,7 +43,7 @@ class ResultList extends React.Component {
                   component={titleComponent}
                   variant="subtitle1"
                   aria-labelledby={`${listId}-result-title ${listId}-result-title-info`}
-                  tabIndex="-1"
+                  tabIndex={-1}
                 >
                   {title}
 
@@ -52,30 +61,30 @@ class ResultList extends React.Component {
             </div>
           )
         }
-        <Divider aria-hidden="true" />
+        {!embeddedList ? <Divider aria-hidden="true" /> : null}
         {beforeList}
         <List className={classes.list} id={listId}>
           {
             data && data.length
             && data.map((item) => {
-              const { id, object_type, sort_index } = item;
-              // Figure out correct icon for item
+              const { id, object_type } = item;
               let itemComponent = null;
               switch (object_type) {
                 case 'unit':
-                  itemComponent = <UnitItem key={`unit-${id}`} className={`unit-${id}`} unit={item} />;
+                  itemComponent = <UnitItem simpleItem={embeddedList} key={`unit-${id}`} className={`unit-${id}`} unit={item} />;
                   break;
                 case 'service':
                   itemComponent = <ServiceItem key={`service-${id}`} service={item} />;
                   break;
                 case 'address':
-                  itemComponent = <AddressItem key={`address-${sort_index}`} address={item} />;
+                  itemComponent = <AddressItem key={`address-${item.municipality.id}-${item.name.fi}`} address={item} />;
+                  break;
+                case 'event':
+                  itemComponent = <EventItem key={`event-${id}`} event={item} />;
                   break;
                 default:
                   if (customComponent && item) {
                     itemComponent = customComponent(item);
-                  } else {
-                    itemComponent = null;
                   }
               }
 
@@ -103,6 +112,7 @@ ResultList.propTypes = {
   resultCount: PropTypes.number,
   title: PropTypes.string,
   titleComponent: PropTypes.oneOf(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']).isRequired,
+  embeddedList: PropTypes.bool,
 };
 
 ResultList.defaultProps = {
@@ -111,4 +121,5 @@ ResultList.defaultProps = {
   customComponent: null,
   resultCount: null,
   title: null,
+  embeddedList: false,
 };

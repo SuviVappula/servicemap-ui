@@ -2,23 +2,30 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Button, useMediaQuery,
-} from '@material-ui/core';
+} from '@mui/material';
 import SettingsText from '../../SettingsText';
 
-const SettingsButton = ({ 'aria-pressed': ariaPressed, classes, settingsOpen, type, onClick }) => {
+const SettingsButton = ({
+  classes, settingsOpen, type, onClick,
+}) => {
   const minWidth = useMediaQuery('(min-width:900px)');
   const maxWidth = useMediaQuery('(max-width: 1100px)');
-  const buttonClass = (type) => `
-    ${classes.settingsButton} ${(settingsOpen === type && classes.settingsButtonPressed) || ''}
+
+  const isSelected = settingsOpen === type;
+
+  const buttonClass = `
+    ${classes.settingsButton} ${(isSelected && classes.settingsButtonPressed) || ''}
     ${(minWidth && maxWidth && classes.smallScreen) || ''}
   `;
   return (
     <Button
-      aria-pressed={ariaPressed}
+      aria-current={isSelected ? 'page' : false}
+      aria-haspopup="dialog"
       id={`SettingsButton${type}`}
       classes={{ label: classes.buttonLabel }}
-      className={buttonClass(type)}
+      className={buttonClass}
       onClick={onClick}
+      role="button"
     >
       <SettingsText type={type} />
     </Button>
@@ -26,7 +33,6 @@ const SettingsButton = ({ 'aria-pressed': ariaPressed, classes, settingsOpen, ty
 };
 
 SettingsButton.propTypes = {
-  'aria-pressed': PropTypes.bool,
   classes: PropTypes.shape({
     buttonLabel: PropTypes.string,
     settingsButton: PropTypes.string,
@@ -35,12 +41,11 @@ SettingsButton.propTypes = {
   }).isRequired,
   settingsOpen: PropTypes.oneOf(['citySettings', 'mapSettings', 'accessibilitySettings']),
   type: PropTypes.oneOf(['citySettings', 'mapSettings', 'accessibilitySettings']).isRequired,
-  onClick: PropTypes.func.isRequired
+  onClick: PropTypes.func.isRequired,
 };
 
 SettingsButton.defaultProps = {
   settingsOpen: null,
-  'aria-pressed': false,
 };
 
 export default SettingsButton;

@@ -1,15 +1,27 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Button, Typography } from '@material-ui/core';
+import { Button, Typography } from '@mui/material';
 import Container from '../Container';
 
 const PaperButton = ({
-  classes, className, intl, disabled, messageID, onClick, icon, link, subtitleID, noBorder, role, ...rest
+  classes,
+  className,
+  intl,
+  disabled,
+  messageID,
+  onClick,
+  icon,
+  link,
+  subtitleID,
+  noBorder,
+  newTab,
+  role,
+  ...rest
 }) => {
   const clonedIcon = icon ? React.cloneElement(icon, { className: classes.icon }) : null;
   const bRole = role || link ? 'link' : 'button';
-  const containerClass = `${classes.container} ${disabled ? classes.buttonDisabled : ''} ${noBorder ? classes.noBorder : ''}${` ${className || ''}`}`;
+  const containerClass = `SM-PaperButton ${classes.container} ${disabled ? classes.buttonDisabled : ''} ${noBorder ? classes.noBorder : ''}${` ${className || ''}`}`;
   return (
     <Container paper className={containerClass}>
       <Button
@@ -20,7 +32,7 @@ const PaperButton = ({
         onClick={onClick}
         role={bRole}
         disabled={disabled}
-        aria-label={`${intl.formatMessage({ id: messageID })} ${subtitleID ? intl.formatMessage({ id: subtitleID }) : ''}`}
+        aria-label={`${intl.formatMessage({ id: messageID })} ${subtitleID ? intl.formatMessage({ id: subtitleID }) : ''} ${newTab ? intl.formatMessage({ id: 'unit.opens.new.tab' }) : ''}`}
         {...rest}
       >
         <div className={`${classes.iconContainer} ${disabled ? classes.iconDisabled : ''}`}>
@@ -29,6 +41,12 @@ const PaperButton = ({
         <div>
           <Typography aria-hidden variant="body2" className={classes.text}>
             <FormattedMessage id={messageID} />
+            {newTab ? (
+              <>
+                {' '}
+                <FormattedMessage id="unit.opens.new.tab" />
+              </>
+            ) : null}
           </Typography>
           {
             subtitleID
@@ -53,6 +71,7 @@ PaperButton.propTypes = {
   noBorder: PropTypes.bool,
   onClick: PropTypes.func,
   messageID: PropTypes.string.isRequired,
+  newTab: PropTypes.bool,
   role: PropTypes.string,
   subtitleID: PropTypes.string,
   intl: PropTypes.objectOf(PropTypes.any).isRequired,
@@ -65,6 +84,7 @@ PaperButton.defaultProps = {
   link: false,
   noBorder: false,
   onClick: null,
+  newTab: false,
   role: null,
   subtitleID: null,
 };

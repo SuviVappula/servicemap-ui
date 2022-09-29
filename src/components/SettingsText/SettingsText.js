@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {
   NoSsr,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { useSelector } from 'react-redux';
 import config from '../../../config';
@@ -11,23 +11,23 @@ import { getIcon } from '../SMIcon';
 import isClient from '../../utils';
 
 const SettingsText = ({ classes, type, variant }) => {
+  const a11ySettings = useSelector(state => ['colorblind', 'hearingAid', 'visuallyImpaired'].filter(a => state.settings[a]));
+  const map = useSelector(state => state.settings.mapType);
+  const mobility = useSelector(state => state.settings.mobility);
+  const citySettings = useSelector((state) => {
+    const { cities } = state.settings;
+    return config.cities.filter(c => cities[c]);
+  });
+
   if (!isClient()) {
     return null;
   }
   let settings;
   let icon;
-  const citySettings = useSelector((state) => {
-    const cities = state.settings.cities;
-    return config.cities.filter(c => cities[c]);
-  });
-  const a11ySettings = useSelector((state) => {
-    return ['colorblind', 'hearingAid', 'visuallyImpaired'].filter(a => state.settings[a])
-  });
-  const map = useSelector(state => state.settings.mapType);
-  const mobility = useSelector(state => state.settings.mobility);
-  // Attempt to get 
+
+  // Attempt to get
   try {
-    switch(type) {
+    switch (type) {
       case 'citySettings':
         if (citySettings.length && citySettings.length !== config.cities.length) {
           settings = citySettings.map(c => ({ id: `settings.city.${c}` }));
@@ -54,7 +54,6 @@ const SettingsText = ({ classes, type, variant }) => {
     }
   } catch (e) {
     console.error(e);
-
   }
 
   if (!settings) {
@@ -68,10 +67,14 @@ const SettingsText = ({ classes, type, variant }) => {
       title = classes.titleSmall;
       text = classes.textSmall;
       break;
+    case 'plain':
+      title = classes.titlePlain;
+      text = classes.textPlain;
+      break;
     default:
       title = classes.title;
-      text = classes.text; 
-  };
+      text = classes.text;
+  }
 
   return (
     <NoSsr>
@@ -82,7 +85,7 @@ const SettingsText = ({ classes, type, variant }) => {
       >
         <FormattedMessage id={`settings.${type}`} />
       </Typography>
-      <Typography component="p" className={text}>
+      <Typography component="p" className={`SettingsTextCurrentSettings ${text}`}>
         {settings.map((s, i) => (
           <React.Fragment key={s.id}>
             {s.icon}
@@ -99,9 +102,14 @@ SettingsText.propTypes = {
   classes: PropTypes.shape({
     title: PropTypes.string,
     text: PropTypes.string,
+    titlePlain: PropTypes.string,
+    textPlain: PropTypes.string,
+    titleSmall: PropTypes.string,
+    textSmall: PropTypes.string,
+    smallIcon: PropTypes.string,
   }).isRequired,
   type: PropTypes.oneOf(['citySettings', 'mapSettings', 'accessibilitySettings']).isRequired,
-  variant: PropTypes.oneOf(['small', 'default']),
+  variant: PropTypes.oneOf(['small', 'default', 'plain']),
 };
 
 SettingsText.defaultProps = {

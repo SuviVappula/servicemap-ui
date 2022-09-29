@@ -1,18 +1,13 @@
 export default theme => ({
-  title: {
-    fontSize: 18,
-    color: '#fff',
-    flex: '1 1 auto',
-    textTransform: 'capitalize',
-    textAlign: 'left',
-    paddingBottom: 8,
-  },
   topArea: {
-    background: theme.palette.background.main,
-    paddingTop: 23,
-    paddingLeft: 21,
+    background: theme.palette.background.plain,
+    // paddingTop: theme.spacing(1),
+    paddingLeft: 27,
     paddingRight: 21,
     paddingBottom: theme.spacing(2),
+  },
+  topBarColor: {
+    background: theme.palette.background.plain,
   },
   mainContent: {
     textAlign: 'left',
@@ -36,8 +31,8 @@ export default theme => ({
     backgroundColor: '#f5f5f5',
   },
   text: {
-    fontSize: '15px',
-    lineHeight: '18px',
+    fontSize: '0.938rem',
+    lineHeight: '1.125rem',
   },
   iconRight: {
     marginLeft: 'auto',
@@ -69,6 +64,10 @@ export default theme => ({
   checkboxFocus: {
     boxShadow: `inset 0 0 0 4px ${theme.palette.primary.main} !important`,
   },
+  guidanceInfoText: {
+    margin: `${theme.spacing(2)} ${theme.spacing(3)}`,
+    marginBottom: 0,
+  },
   outerLines: {
     height: '100%',
     width: 26,
@@ -84,12 +83,12 @@ export default theme => ({
     marginBottom: theme.spacing(1),
   },
   selectionText: {
-    fontSize: 12,
+    fontSize: '0.75rem',
     paddingRight: theme.spacing(2),
     color: '#fff',
   },
   deleteText: {
-    fontSize: 12,
+    fontSize: '0.75rem',
     paddingRight: theme.spacing(1),
     color: '#fff',
   },

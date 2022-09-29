@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
   Drawer,
-} from '@material-ui/core';
-import { Map } from '@material-ui/icons';
+} from '@mui/material';
+import { Map } from '@mui/icons-material';
 import { getIcon } from '../../SMIcon';
 import DrawerButton from './DrawerButton';
 import useLocaleText from '../../../utils/useLocaleText';
@@ -96,30 +96,32 @@ const DrawerMenu = (props) => {
       open={isOpen}
       classes={{ paper: pageType === 'mobile' ? classes.drawerContainerMobile : classes.drawerContainer }}
     >
-      {menuContent.map((item) => {
-        if (item.type === 'settings') {
+      <div className={classes.scrollContainer}>
+        {menuContent.map((item) => {
+          if (item.type === 'settings') {
+            return (
+              <DrawerSettings
+                key={item.type}
+                onClick={item.clickEvent}
+              />
+            );
+          }
+
           return (
-            <DrawerSettings
-              key={item.type}
+            <DrawerButton
+              key={item.name}
+              active={item.active}
+              disabled={item.disabled}
+              disableRipple
+              icon={item.icon}
+              isOpen={isOpen}
+              text={item.name}
               onClick={item.clickEvent}
+              subText={item.subText}
             />
           );
-        }
-        
-        return (
-          <DrawerButton
-            key={item.name}
-            active={item.active}
-            disabled={item.disabled}
-            disableRipple
-            icon={item.icon}
-            isOpen={isOpen}
-            text={item.name}
-            onClick={item.clickEvent}
-            subText={item.subText}
-          />
-        );
-      })}
+        })}
+      </div>
     </Drawer>
   // </ClickAwayListener>
   );

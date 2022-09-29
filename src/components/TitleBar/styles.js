@@ -12,11 +12,24 @@ export default theme => ({
     color: '#fff',
     padding: theme.spacing(1),
   },
+  multiLine: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    paddingLeft: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
+  },
   textBar: {
     paddingLeft: 36,
   },
+  titleContainer: {
+    flexDirection: 'row',
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+  },
   title: {
-    fontSize: 18,
+    fontSize: '1.125rem',
     color: 'inherit',
     flex: '1 1 auto',
     textTransform: 'none',
@@ -25,13 +38,26 @@ export default theme => ({
     '&:focus': {
       outlineStyle: 'none',
     },
+    height: 'auto',
+  },
+  titleLarge: {
+    fontSize: '1.25rem',
+    fontWeight: 'bold',
   },
   iconButton: {
     display: 'flex',
     color: 'inherit',
     flex: '0 1 auto',
-    padding: theme.spacing(1),
-    marginLeft: theme.spacing(0.5),
+    padding: 0,
+    margin: theme.spacing(1),
+    marginTop: 0,
+    fontSize: '1.125rem',
+  },
+  icon: {
+    display: 'flex',
+    color: 'inherit',
+    margin: theme.spacing(1),
+    padding: 0,
   },
   buttonFocus: {
     outline: '2px solid transparent',
@@ -41,13 +67,13 @@ export default theme => ({
     color: '#000',
   },
   distance: {
-    fontSize: 16,
+    fontSize: '1rem',
     color: 'inherit',
     marginLeft: 'auto',
     paddingLeft: theme.spacing(1),
-    paddingTop: 4,
     marginRight: theme.spacing(1),
     minWidth: 50,
+    flex: '0 0 auto',
   },
   sticky: {
     position: 'sticky',

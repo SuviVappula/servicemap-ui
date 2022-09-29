@@ -13,9 +13,21 @@ const styles = theme => ({
         color: '#347865 !important',
       },
     },
+    '&:focus': {
+      margin: '4px 4px 4px 0px',
+      height: 'calc(100% - 8px)',
+      outline: '2px solid transparent',
+      boxShadow: `0 0 0 4px ${theme.palette.focusBorder.main}`,
+    },
+  },
+  mapNoSidebar: {
+    '&:focus': {
+      margin: 4,
+    },
   },
   addressLink: {
-    color: theme.palette.primary.main,
+    color: theme.palette.link.main,
+    textDecoration: 'underline',
   },
   loadingScreen: {
     height: '100%',
@@ -26,6 +38,9 @@ const styles = theme => ({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: theme.zIndex.infront,
+  },
+  controlsContainer: {
+    marginBottom: theme.spacing(2),
   },
   popup: {
     padding: 12,
@@ -45,7 +60,7 @@ const styles = theme => ({
     paddingBottom: theme.spacing(2),
   },
   coordinateLink: {
-    color: theme.palette.primary.main,
+    color: theme.palette.link.main,
     wordBreak: 'break-word',
     textAlign: 'left',
     maxWidth: 240,
@@ -61,15 +76,19 @@ const styles = theme => ({
     textAlign: 'center',
     paddingTop: theme.spacing(0.5),
   },
+  parkingLayer: {
+    zIndex: theme.zIndex.infront,
+  },
   marginBottom: {
-    marginBottom: `${theme.spacing(2)}px !important`,
+    marginBottom: `${theme.spacing(2)} !important`,
   },
   embedLogo: {
-    bottom: 0,
+    top: 0,
     left: 0,
     height: 'auto',
     position: 'fixed',
     zIndex: 1000,
+    padding: theme.spacing(1.5),
   },
   userMarker: {
     display: 'flex',
@@ -99,9 +118,6 @@ const styles = theme => ({
   showLocationIcon: {
     color: '#fff',
   },
-  measuringCursor: {
-    cursor: 'crosshair',
-  },
   colorInherit: {
     color: 'inherit',
   },
@@ -125,6 +141,9 @@ const styles = theme => ({
         boxShadow: '0px 4px 4px 0px rgba(255,255,255,0.8)',
       },
     },
+  },
+  unitMarkerEvent: {
+    borderRadius: 0,
   },
   markerCircle: {
     alignItems: 'center',
@@ -185,14 +204,31 @@ const styles = theme => ({
     ...theme.typography.body2,
     margin: theme.spacing(0, 1),
   },
+  unitTooltipCaption: {
+    fontSize: '0.7725rem',
+    lineHeight: '1rem',
+    letterSpacing: '0.025rem',
+  },
+  unitTooltipEventContainer: {
+    paddingLeft: theme.spacing(0.5),
+    paddingTop: theme.spacing(1),
+  },
+  unitTooltipDivider: {
+    backgroundColor: 'rgba(0, 0, 0, 0.12)',
+    height: 1,
+    border: 'none',
+    marginLeft: -8,
+    marginRight: -8,
+  },
   unitTooltipLink: {
     ...theme.typography.body2,
     paddingTop: theme.spacing(1),
     textAlign: 'center',
-    color: theme.palette.primary.main,
+    color: theme.palette.primary.link,
   },
   unitTooltipWrapper: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
+    paddingBottom: theme.spacing(2.5),
   },
   unitPopupList: {
     listStyleType: 'none',
@@ -201,7 +237,7 @@ const styles = theme => ({
     maxHeight: '25vh',
     '& .popup-distance': {
       fontWeight: 'normal',
-      fontSize: '14px',
+      fontSize: '0.875rem',
     },
     '& li': {
       display: 'flex',
@@ -270,6 +306,54 @@ const styles = theme => ({
     top: 16,
     left: 16,
   },
+  entranceType: {
+    paddingTop: theme.spacing(0.5),
+  },
+
+  // Event markers
+  popupContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    padding: theme.spacing(2),
+    paddingRight: 0,
+    paddingLeft: 0,
+  },
+  popupTopArea: {
+    paddingRight: theme.spacing(2),
+    paddingLeft: theme.spacing(2),
+  },
+  popoupTitleArea: {
+    display: 'flex',
+  },
+  popupCloseButton: {
+    marginLeft: 'auto',
+    marginBottom: 'auto',
+    marginRight: -theme.spacing(1),
+    marginTop: 3,
+    paddingLeft: theme.spacing(1),
+  },
+  addressContainer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    paddingBottom: theme.spacing(1),
+  },
+  popupList: {
+    backgroundColor: '#fafafa',
+    boxShadow: 'inset 0px 4px 4px rgba(0, 0, 0, 0.06)',
+    maxHeight: 175,
+    overflow: 'scroll',
+  },
+  popupListItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'start',
+    paddingBottom: 0,
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+  },
+  eventDate: {
+    fontSize: '0.75rem',
+  },
 
   // Transit stops
   transitBackground: {
@@ -287,7 +371,7 @@ const styles = theme => ({
     lineHeight: 1,
     textShadow: '-1px 0 #fff, 0 1px #fff, 1px 0 #fff, 0 -1px #fff',
   },
-  transitIconInfo: {
+  infoIcon: {
     fontSize: 18,
     width: 18,
     height: 18,
@@ -296,7 +380,6 @@ const styles = theme => ({
     marginRight: 4,
   },
   tranistInfoContainer: {
-    width: 230,
     padding: theme.spacing(2),
     display: 'flex',
     flexDirection: 'column',
@@ -317,7 +400,7 @@ const styles = theme => ({
   },
   departureTime: {
     width: '15%',
-    fontSize: 13,
+    fontSize: '0.813rem',
   },
   departureVehicle: {
     width: '38%',
@@ -328,7 +411,7 @@ const styles = theme => ({
     fontWeight: 'bold',
   },
   routeName: {
-    fontSize: 12,
+    fontSize: '0.75rem',
     width: '55%',
     overflow: 'hidden',
     whiteSpace: 'nowrap',
@@ -338,7 +421,7 @@ const styles = theme => ({
     marginLeft: 'auto',
   },
   closeText: {
-    fontSize: 12,
+    fontSize: '0.75rem',
     color: 'rgba(0,0,0,0.6)',
   },
   busIconColor: {
@@ -352,6 +435,9 @@ const styles = theme => ({
   },
   metroIconColor: {
     color: '#FF6319',
+  },
+  bikeIconColor: {
+    color: '#fcb919',
   },
   ferryIconColor: {
     color: '#00B9E4',

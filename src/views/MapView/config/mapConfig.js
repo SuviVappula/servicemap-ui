@@ -39,8 +39,9 @@ const tileLayers = {
   orthoImageLayer: {
     crsName: 'EPSG:3879',
     projDef: '+proj=tmerc +lat_0=0 +lon_0=25 +k=1 +x_0=25500000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs',
-    boundPoints: [[25440000, 6630000], [25571072, 6761072]],
+    boundPoints: [[25472049, 6647388], [25537585, 7695964]],
     resolutions: [256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25, 0.125, 0.0625, 0.03125],
+    origin: [25472049, 7646428],
   },
   // tms35 not used currently
   // tms35: {
@@ -63,8 +64,7 @@ const mapTypes = {
     clusterPopupVisibility: 13,
     unitZoom: 15,
     mobileZoom: 12,
-    transitZoom: 17,
-    mobileTransitZoom: 16,
+    detailZoom: 17,
   },
   accessible_map: {
     name: 'accessible_map',
@@ -76,8 +76,7 @@ const mapTypes = {
     clusterPopupVisibility: 13,
     unitZoom: 15,
     mobileZoom: 12,
-    transitZoom: 17,
-    mobileTransitZoom: 16,
+    detailZoom: 17,
   },
   ortographic: {
     name: 'ortographic',
@@ -85,14 +84,15 @@ const mapTypes = {
     layer: tileLayers.orthoImageLayer,
     // TODO: maybe have map names and formats as variables from the URL, like in the old version
     generateUrl: () => config.ortographicMapURL,
+    wmsUrl: config.ortographicWMSURL,
+    wmsLayerName: config.ortographicWMSLAYER,
     minZoom: 3,
     maxZoom: 10,
     zoom: 5,
     clusterPopupVisibility: 6,
     unitZoom: 7,
     mobileZoom: 4,
-    transitZoom: 9,
-    mobileTransitZoom: 8,
+    detailZoom: 9,
     mapBounds: [
       [60.590720832407364, 25.390521218333532],
       [60.590720832407364, 24.276736721022225],
@@ -112,8 +112,7 @@ const mapTypes = {
     clusterPopupVisibility: 11,
     unitZoom: 12,
     mobileZoom: 9,
-    transitZoom: 14,
-    mobileTransitZoom: 13,
+    detailZoom: 14,
     mapBounds: [
       [60.402200415095926, 25.271114398151653],
       [60.402200415095926, 24.49246149510767],

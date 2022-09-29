@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
-import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import URI from 'urijs';
-import config from '../../config';
 
 const isClient = () => typeof window !== 'undefined';
 
@@ -13,6 +13,8 @@ export const isRetina = () => {
 };
 
 export const uppercaseFirst = val => val.charAt(0).toUpperCase() + val.slice(1);
+
+export const validateEmail = email => /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
 
 // Function for parsing react router search params
 export const parseSearchParams = (searchParams) => {
@@ -53,6 +55,19 @@ export const stringifySearchParams = (searchParams) => {
   const string = searchParamsObject.toString().replace(/[+]/g, ' ');
 
   return string;
+};
+
+// Custom hook for getting url query parameters as object
+export const useQuery = () => {
+  const { search } = useLocation();
+  return useMemo(() => {
+    const queryParams = new URLSearchParams(search);
+    const queryObject = {};
+    queryParams.forEach((value, key) => {
+      queryObject[key] = value;
+    });
+    return queryObject;
+  }, [search]);
 };
 
 // Keyboard handler
@@ -130,22 +145,6 @@ export const arraysEqual = (a, b) => {
     if (a[i] !== b[i]) return false;
   }
   return true;
-};
-/**
- * USE ONLY IN SIMPLE COMPONENTS because mediaquery hook
- * Check if sidebar content is small
- * Return true if smaller than smallContent treshold
- * or smallscreen but not mobile
- */
-export const isSmallContentArea = () => {
-  const { smallContentAreaBreakpoint, mobileUiBreakpoint, smallScreenBreakpoint } = config;
-  const smallContent = useMediaQuery(`(max-width:${smallContentAreaBreakpoint}px)`);
-  const smallScreen = useMediaQuery(`(max-width:${smallScreenBreakpoint}px)`);
-  const notMobile = useMediaQuery(`(min-width:${mobileUiBreakpoint}px)`);
-  return (
-    smallContent
-    || (smallScreen && notMobile)
-  );
 };
 
 export const getSearchParam = (location, key) => {

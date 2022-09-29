@@ -12,9 +12,21 @@ const embedderConfig = {
     servicemap: 'en',
   },
   LANGUAGES: {
-    fi: 'suomi',
-    en: 'english',
-    sv: 'svenska',
+    fi: {
+      fi: 'suomi',
+      en: 'englanti',
+      sv: 'ruotsi',
+    },
+    en: {
+      fi: 'finnish',
+      en: 'english',
+      sv: 'swedish',
+    },
+    sv: {
+      fi: 'finska',
+      en: 'engelska',
+      sv: 'svenska',
+    },
   },
   BACKGROUND_MAPS: SettingsUtility.mapSettings,
   CITIES: SettingsUtility.citySettings,
@@ -25,7 +37,7 @@ const embedderConfig = {
     },
     frameBorder: 0,
   },
-  DEFAULT_CUSTOM_WIDTH: '400',
+  DEFAULT_CUSTOM_WIDTH: '500',
   BASE_URL: '/embedder',
 };
 

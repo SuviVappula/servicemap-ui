@@ -24,10 +24,15 @@ export default theme => ({
     overflow: 'auto',
   },
   wrapper: {
+    position: 'relative',
     flex: '0 1 auto',
     borderRadius: 4,
   },
   mobileWrapper: {
+    flex: '0 1 auto',
+    borderRadius: 4,
+  },
+  mobileWrapperActive: {
     flex: '0 1 auto',
     display: 'flex',
     flexDirection: 'column',
@@ -93,6 +98,7 @@ export default theme => ({
     '& svg': {
       fontSize: 28,
     },
+    flexDirection: 'column',
   },
   searchButtonFocus: {
     boxShadow: '0 0 0 4px #fff !important',
@@ -130,7 +136,7 @@ export default theme => ({
     paddingLeft: '18px',
   },
   subtitleText: {
-    lineHeight: '32px',
+    lineHeight: '2rem',
   },
   expandTitle: {
     alignSelf: 'center',
@@ -170,7 +176,7 @@ export default theme => ({
   },
   cancelButton: {
     '& svg': {
-      fontSize: 14,
+      fontSize: '0.875rem',
     },
   },
   closeButton: {

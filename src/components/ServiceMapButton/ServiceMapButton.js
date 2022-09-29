@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ButtonBase, Typography } from '@material-ui/core';
-import { FormattedMessage } from 'react-intl';
+import { ButtonBase, Typography } from '@mui/material';
 
 // ServiceMapButton
-const SMButton = React.forwardRef((props, ref) => {
+const SMButton = (props) => {
   const {
     'aria-label': ariaLabel,
     children,
@@ -15,32 +14,33 @@ const SMButton = React.forwardRef((props, ref) => {
     color,
     icon,
     messageID,
+    messageCount,
     onClick,
     margin,
     style,
     role,
     disabled,
+    textVariant,
+    passingRef,
     ...rest
   } = props;
   const colorStyle = classes[color] || '';
-  const buttonIcon = icon ? React.cloneElement(icon, { className: classes.buttonIcon }) : null;
-  const buttonClasses = `${classes.button} ${small ? classes.smallButton : ''} ${margin ? classes.margin : classes.marginRight} ${className} ${colorStyle}`;
+  const buttonClasses = `SMButton ${classes.button} ${small ? classes.smallButton : ''} ${margin ? classes.margin : classes.marginRight} ${className} ${colorStyle}`;
   const textClasses = classes.typography;
 
   let buttonTitle = null;
 
   if (messageID) {
-    buttonTitle = intl.formatMessage({ id: messageID });
+    buttonTitle = intl.formatMessage({ id: messageID }, { count: messageCount });
   }
 
   return (
     <ButtonBase
       {...rest}
-      ref={ref}
+      ref={passingRef}
       aria-label={ariaLabel || buttonTitle}
       disabled={disabled}
       className={buttonClasses}
-      icon={buttonIcon}
       onClick={onClick}
       role={role || 'button'}
       style={{
@@ -54,8 +54,8 @@ const SMButton = React.forwardRef((props, ref) => {
       {
         messageID
         && (
-          <Typography aria-hidden color="inherit" component="p" variant="caption" className={textClasses}>
-            <FormattedMessage id={messageID} />
+          <Typography aria-hidden color="inherit" component="p" variant={textVariant || 'caption'} className={textClasses}>
+            {buttonTitle}
           </Typography>
         )
       }
@@ -65,7 +65,7 @@ const SMButton = React.forwardRef((props, ref) => {
       }
     </ButtonBase>
   );
-});
+};
 
 SMButton.propTypes = {
   'aria-label': PropTypes.string,
@@ -79,9 +79,12 @@ SMButton.propTypes = {
   style: PropTypes.objectOf(PropTypes.any),
   classes: PropTypes.objectOf(PropTypes.any).isRequired,
   children: PropTypes.node,
-  role: PropTypes.string.isRequired,
+  role: PropTypes.oneOf(['button', 'link']).isRequired,
   disabled: PropTypes.bool,
   intl: PropTypes.objectOf(PropTypes.any).isRequired,
+  textVariant: PropTypes.string,
+  messageCount: PropTypes.number,
+  passingRef: PropTypes.shape({ current: PropTypes.objectOf(PropTypes.any) }),
 };
 
 SMButton.defaultProps = {
@@ -95,6 +98,9 @@ SMButton.defaultProps = {
   messageID: null,
   style: null,
   disabled: false,
+  textVariant: 'caption',
+  messageCount: null,
+  passingRef: null,
 };
 
 export default SMButton;

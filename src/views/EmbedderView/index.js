@@ -1,4 +1,4 @@
-import { withStyles } from '@material-ui/core';
+import { withStyles } from '@mui/styles';
 import { injectIntl } from 'react-intl';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
@@ -12,7 +12,7 @@ const mapStateToProps = (state) => {
   const { mapType } = settings;
 
   return {
-    citySettings: SettingsUtility.getActiveCitySettings(state),
+    citySettings: SettingsUtility.getActiveCitySettings(settings.cities),
     mapType,
     navigator,
   };

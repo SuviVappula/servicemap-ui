@@ -14,7 +14,7 @@ export default theme => ({
     marginRight: theme.spacing(2),
     whiteSpace: 'pre-line',
     '& p': {
-      lineHeight: '18px',
+      lineHeight: '1.125rem',
     },
   },
   listIcon: {
@@ -34,11 +34,20 @@ export default theme => ({
   },
   suggestIconLabel: {
     padding: theme.spacing(1),
+    color: 'rgba(0, 0, 0, 0.87)',
+    textTransform: 'none',
+    '&:hover': {
+      color: '#2242C7',
+      textDecorationLine: 'underline',
+    },
   },
   subtitle: {
-    fontSize: '10px',
+    fontSize: '0.625rem',
     fontWeight: 'none',
-    lineHeight: '18px',
+    lineHeight: '1.125rem',
+  },
+  historyText: {
+    color: '#660DD7',
   },
   divider: {
     marginLeft: theme.spacing(8),
@@ -46,6 +55,9 @@ export default theme => ({
   },
   text: {
     alignSelf: 'center',
+  },
+  removeText: {
+    color: 'inherit',
   },
   itemFocus: {
     outline: '2px solid transparent',

@@ -10,19 +10,24 @@ import thunk from 'redux-thunk';
 import config from '../config';
 import rootReducer from '../src/redux/rootReducer';
 import App from '../src/App';
-import { makeLanguageHandler, languageSubdomainRedirect, unitRedirect, parseInitialMapPositionFromHostname, getRequestFullUrl } from './utils';
+import { makeLanguageHandler, languageSubdomainRedirect, unitRedirect, parseInitialMapPositionFromHostname, getRequestFullUrl, sitemapActive } from './utils';
 import { setLocale } from '../src/redux/actions/user';
 import { Helmet } from 'react-helmet';
-import { ServerStyleSheets } from '@material-ui/core/styles';
+import { ServerStyleSheets } from '@mui/styles';
+import { CacheProvider } from '@emotion/react';
+import createEmotionServer from '@emotion/server/create-instance';
 import fetch from 'node-fetch';
 import { fetchEventData, fetchSelectedUnitData } from './dataFetcher';
 import IntlPolyfill from 'intl';
 import paths from '../config/paths';
 import legacyRedirector from './legacyRedirector';
-import { matomoTrackingCode, appDynamicsTrackingCode, cookieHubCode } from './externalScripts';
+import { appDynamicsTrackingCode, cookieHubCode } from './externalScripts';
 import { getLastCommit, getVersion } from './version';
 import ieHandler from './ieMiddleware';
+import schedule from 'node-schedule'
 import ogImage from '../src/assets/images/servicemap-meta-img.png';
+import { generateSitemap, getRobotsFile, getSitemap } from './sitemapMiddlewares';
+import createEmotionCache from './createEmotionCache';
 
 // Get sentry dsn from environtment variables
 const sentryDSN = process.env.SENTRY_DSN_SERVER;
@@ -47,8 +52,21 @@ const setupTests = () => {
   }
 };
 setupTests();
+
+// Handle sitemap creation
+  if (sitemapActive()) {
+  // Generate sitemap on start
+  generateSitemap();
+  // Update sitemap every monday
+  schedule.scheduleJob({ hour: 8, minute: 0, dayOfWeek: 1 }, () => {
+    console.log('Updating sitemap...')
+    generateSitemap();
+  });
+}
+
 // Configure constants
 const app = express();
+app.disable('x-powered-by');
 const supportedLanguages = config.supportedLanguages;
 
 const versionTag = getVersion();
@@ -72,12 +90,14 @@ app.use(`/*`, (req, res, next) => {
 });
 app.use('/*', ieHandler)
 app.use(`/rdr`, legacyRedirector);
+app.use('/sitemap.xml', getSitemap);
+app.get('/robots.txt', getRobotsFile);
 app.use('/', languageSubdomainRedirect);
 app.use(`/`, makeLanguageHandler);
 app.use('/', unitRedirect);
 // Handle treenode redirect
 app.use('/', (req, res, next) => {
-  if (req.query.treenode != null) {
+  if (req.query.treenode != null && process.env.DOMAIN.includes(req.get('host'))) {
     const fullUrl = req.originalUrl.replace(/treenode/g, 'service_node');
     res.redirect(301, fullUrl);
     return;
@@ -88,6 +108,9 @@ app.use(paths.event.regex, fetchEventData);
 app.use(paths.unit.regex, fetchSelectedUnitData);
 
 app.get('/*', (req, res, next) => {
+  const cache = createEmotionCache();
+  const { extractCriticalToChunks, constructStyleTagsFromChunks } =
+    createEmotionServer(cache);
   // CSS for all rendered React components
   const css = new Set();
   const insertCss = (...styles) => styles.forEach(style => css.add(style._getCss()));
@@ -105,14 +128,16 @@ app.get('/*', (req, res, next) => {
   const sheets = new ServerStyleSheets();
 
   const jsx = sheets.collect(
-    <Provider store={store}>
-      <StaticRouter location={req.url} context={{}}>
-        {/* Provider to help with isomorphic style loader */}
-        <StyleContext.Provider value={{ insertCss }}>
-          <App />
-        </StyleContext.Provider>
-      </StaticRouter>
-    </Provider>
+    <CacheProvider value={cache}>
+      <Provider store={store}>
+        <StaticRouter location={req.url} context={{}}>
+          {/* Provider to help with isomorphic style loader */}
+          <StyleContext.Provider value={{ insertCss }}>
+            <App />
+          </StyleContext.Provider>
+        </StaticRouter>
+      </Provider>
+    </CacheProvider>
   );
   const reactDom = ReactDOMServer.renderToString(jsx);
   const cssString = sheets.toString();
@@ -124,8 +149,11 @@ app.get('/*', (req, res, next) => {
     initialMapPosition: parseInitialMapPositionFromHostname(req, Sentry)
   };
 
+  const emotionChunks = extractCriticalToChunks(reactDom);
+  const emotionCss = constructStyleTagsFromChunks(emotionChunks);
+
   res.writeHead(200, { 'Content-Type': 'text/html' });
-  res.end(htmlTemplate(req, reactDom, preloadedState, css, cssString, locale, helmet, customValues));
+  res.end(htmlTemplate(req, reactDom, preloadedState, css, cssString, emotionCss, locale, helmet, customValues));
 });
 
 // The error handler must be before any other error middleware
@@ -136,7 +164,7 @@ if (Sentry) {
 console.log(`Starting server on port ${process.env.PORT || 2048}`);
 app.listen(process.env.PORT || 2048);
 
-const htmlTemplate = (req, reactDom, preloadedState, css, cssString, locale, helmet, customValues) => `
+const htmlTemplate = (req, reactDom, preloadedState, css, cssString, emotionCss, locale, helmet, customValues) => `
 <!DOCTYPE html>
 <html lang="${locale || 'fi'}">
   <head>
@@ -146,6 +174,7 @@ const htmlTemplate = (req, reactDom, preloadedState, css, cssString, locale, hel
     <meta property="og:url" data-react-helmet="true" content="${getRequestFullUrl(req)}" />
     <meta property="og:image" data-react-helmet="true" content="${ogImage}" />
     <meta name="twitter:card" data-react-helmet="true" content="summary" />
+    ${emotionCss}
     <!-- jss-insertion-point -->
     <style id="jss-server-side">${cssString}</style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
@@ -190,17 +219,30 @@ const htmlTemplate = (req, reactDom, preloadedState, css, cssString, locale, hel
         window.nodeEnvSettings.DIGITRANSIT_API = "${process.env.DIGITRANSIT_API}";
         window.nodeEnvSettings.FEEDBACK_URL = "${process.env.FEEDBACK_URL}";
         window.nodeEnvSettings.HEARING_MAP_API = "${process.env.HEARING_MAP_API}";
+        window.nodeEnvSettings.HSL_ROUTE_GUIDE_URL = "${process.env.HSL_ROUTE_GUIDE_URL}";
+        window.nodeEnvSettings.HSL_ROUTE_GUIDE_CITIES = "${process.env.HSL_ROUTE_GUIDE_CITIES}";
+        window.nodeEnvSettings.MATOMO_MOBILITY_DIMENSION_ID = "${process.env.MATOMO_MOBILITY_DIMENSION_ID}";
+        window.nodeEnvSettings.MATOMO_SENSES_DIMENSION_ID = "${process.env.MATOMO_SENSES_DIMENSION_ID}";
+        window.nodeEnvSettings.MATOMO_NO_RESULTS_DIMENSION_ID = "${process.env.MATOMO_NO_RESULTS_DIMENSION_ID}";
+        window.nodeEnvSettings.MATOMO_URL = "${process.env.MATOMO_URL}";
+        window.nodeEnvSettings.MATOMO_SITE_ID = "${process.env.MATOMO_SITE_ID}";
         window.nodeEnvSettings.MODE = "${process.env.MODE}";
         window.nodeEnvSettings.INITIAL_MAP_POSITION = "${customValues.initialMapPosition}";
         window.nodeEnvSettings.SERVICE_MAP_URL = "${process.env.SERVICE_MAP_URL}";
         window.nodeEnvSettings.ACCESSIBLE_MAP_URL = "${process.env.ACCESSIBLE_MAP_URL}";
         window.nodeEnvSettings.ORTOGRAPHIC_MAP_URL = "${process.env.ORTOGRAPHIC_MAP_URL}";
+        window.nodeEnvSettings.ORTOGRAPHIC_WMS_URL = "${process.env.ORTOGRAPHIC_WMS_URL}";
+        window.nodeEnvSettings.ORTOGRAPHIC_WMS_LAYER = "${process.env.ORTOGRAPHIC_WMS_LAYER}";
         window.nodeEnvSettings.GUIDE_MAP_URL = "${process.env.GUIDE_MAP_URL}";
         window.nodeEnvSettings.REITTIOPAS_URL = "${process.env.REITTIOPAS_URL}";
         window.nodeEnvSettings.OUTDOOR_EXERCISE_URL = "${process.env.OUTDOOR_EXERCISE_URL}";
         window.nodeEnvSettings.NATURE_AREA_URL = "${process.env.NATURE_AREA_URL}";
+        window.nodeEnvSettings.EMBEDDER_DOCUMENTATION_URL = "${process.env.EMBEDDER_DOCUMENTATION_URL}";
         window.nodeEnvSettings.CITIES = "${process.env.CITIES}";
         window.nodeEnvSettings.MAPS = "${process.env.MAPS}";
+        window.nodeEnvSettings.ACCESSIBILITY_STATEMENT_URL_FI = "${process.env.ACCESSIBILITY_STATEMENT_URL_FI}";
+        window.nodeEnvSettings.ACCESSIBILITY_STATEMENT_URL_SV = "${process.env.ACCESSIBILITY_STATEMENT_URL_SV}";
+        window.nodeEnvSettings.ACCESSIBILITY_STATEMENT_URL_EN = "${process.env.ACCESSIBILITY_STATEMENT_URL_EN}";
         window.nodeEnvSettings.OLD_MAP_LINK_EN = "${process.env.OLD_MAP_LINK_EN}";
         window.nodeEnvSettings.OLD_MAP_LINK_FI = "${process.env.OLD_MAP_LINK_FI}";
         window.nodeEnvSettings.OLD_MAP_LINK_SV = "${process.env.OLD_MAP_LINK_SV}";
@@ -221,7 +263,6 @@ const htmlTemplate = (req, reactDom, preloadedState, css, cssString, locale, hel
       window.PRELOADED_STATE = ${JSON.stringify(preloadedState).replace(/</g, '\\u003c')}
     </script>
     <script src="/index.js"></script>
-    ${matomoTrackingCode(process.env.MATOMO_URL, process.env.MATOMO_SITE_ID)}
   </body>
 </html>
 `;

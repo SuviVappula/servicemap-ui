@@ -1,6 +1,6 @@
 export default {
   container: {
-    height: 102,
+    height: 178,
     width: 102,
     '& button': {
       backgroundClip: 'padding-box',
@@ -13,13 +13,14 @@ export default {
       height: 34,
       lineHeight: '30px',
       padding: 0,
+      pointerEvents: 'auto',
     },
   },
   top: {
     right: 34,
   },
   bottom: {
-    bottom: 0,
+    bottom: 76,
     right: 34,
   },
   right: {
@@ -29,5 +30,16 @@ export default {
   left: {
     left: 0,
     top: 34,
+  },
+  zoomIn: {
+    bottom: 31,
+    right: 34,
+  },
+  zoomOut: {
+    bottom: 0,
+    right: 34,
+  },
+  embedded: {
+    right: 2,
   },
 };

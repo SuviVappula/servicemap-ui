@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Typography, LinearProgress, withStyles } from '@material-ui/core';
+import { Typography, LinearProgress } from '@mui/material';
+import { withStyles } from '@mui/styles';
 import { FormattedMessage } from 'react-intl';
 import styles from './styles';
 
@@ -13,7 +14,7 @@ const Loading = (props) => {
     const {
       count, data, isFetching, max,
     } = reducer;
-    // Render loding text if currently loading information
+    // Render loading text if currently loading information
     if (isFetching) {
       if (max) {
         const progress = (isFetching && count) ? Math.floor((count / max * 100)) : 0;
@@ -52,6 +53,8 @@ Loading.propTypes = {
   progress: PropTypes.number,
   reducer: PropTypes.shape({
     isFetching: PropTypes.bool,
+    count: PropTypes.number,
+    max: PropTypes.number,
     data: PropTypes.oneOfType([
       PropTypes.objectOf(PropTypes.any),
       PropTypes.array,

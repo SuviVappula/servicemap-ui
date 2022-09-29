@@ -1,28 +1,31 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import Accessible from '@material-ui/icons/Accessible';
+import Accessible from '@mui/icons-material/Accessible';
 import { FormattedMessage } from 'react-intl';
-import { Typography, ButtonBase } from '@material-ui/core';
-import { Close } from '@material-ui/icons';
+import { Typography, ButtonBase } from '@mui/material';
+import { Close } from '@mui/icons-material';
 import { fetchStopData } from '../../../utils/transitFetch';
-import { getIcon } from '../../../../../components/SMIcon';
 import useLocaleText from '../../../../../utils/useLocaleText';
+import { getIcon } from '../../../../../components';
 
-const TransitStopInfo = ({ stop, onCloseClick, classes }) => {
+const TransitStopInfo = ({
+  stop, onCloseClick, type, classes,
+}) => {
   const getLocaleText = useLocaleText();
   const [stopData, setStopData] = useState({ departureTimes: null, wheelchair: null });
 
   const getAccessibilityIcon = (value) => {
     if (value === 'POSSIBLE') {
-      return <Accessible className={classes.transitIconInfo} />;
+      return <Accessible className={classes.infoIcon} />;
     } if (value === 'NOT_POSSIBLE') {
-      return getIcon('noWheelchair', { className: classes.transitIconInfo });
+      return getIcon('noWheelchair', { className: classes.infoIcon });
     }
     return null;
   };
 
   useEffect(() => {
+    if (type === 'bikeStation') return;
     fetchStopData(stop)
       .then((stopData) => {
         if (stopData) {
@@ -44,22 +47,22 @@ const TransitStopInfo = ({ stop, onCloseClick, classes }) => {
     let icon;
     switch (stop.vehicleType) {
       case 3: // Bus stops
-        icon = <span className={`${classes.transitIconInfo} ${classes.busIconColor} icon-icon-hsl-bus`} />;
+        icon = <span className={`${classes.infoIcon} ${classes.busIconColor} icon-icon-hsl-bus`} />;
         break;
       case 0: // Tram stops
-        icon = <span className={`${classes.transitIconInfo} ${classes.tramIconColor} icon-icon-hsl-tram`} />;
+        icon = <span className={`${classes.infoIcon} ${classes.tramIconColor} icon-icon-hsl-tram`} />;
         break;
       case 109: // Train stops
-        icon = <span className={`${classes.transitIconInfo} ${classes.trainIconColor} icon-icon-hsl-train`} />;
+        icon = <span className={`${classes.infoIcon} ${classes.trainIconColor} icon-icon-hsl-train`} />;
         break;
       case 1: // Subway stops
-        icon = <span className={`${classes.transitIconInfo} ${classes.metroIconColor} icon-icon-hsl-metro`} />;
+        icon = <span className={`${classes.infoIcon} ${classes.metroIconColor} icon-icon-hsl-metro`} />;
         break;
       case -999: case 4: // Ferry stops
-        icon = <span className={`${classes.transitIconInfo} ${classes.ferryIconColor} icon-icon-hsl-ferry`} />;
+        icon = <span className={`${classes.infoIcon} ${classes.ferryIconColor} icon-icon-hsl-ferry`} />;
         break;
       default:
-        icon = <span className={`${classes.transitIconInfo} ${classes.busIconColor} icon-icon-hsl-bus`} />;
+        icon = <span className={`${classes.infoIcon} ${classes.busIconColor} icon-icon-hsl-bus`} />;
         break;
     }
 
@@ -93,10 +96,10 @@ const TransitStopInfo = ({ stop, onCloseClick, classes }) => {
 
 
   return (
-    <div className={classes.tranistInfoContainer}>
+    <div aria-hidden className={classes.tranistInfoContainer}>
       <ButtonBase onClick={() => onCloseClick()} className={classes.closeButton}>
         <Typography className={classes.closeText}><FormattedMessage id="general.close" /></Typography>
-        <Close className={classes.transitIconInfo} />
+        <Close className={classes.infoIcon} />
       </ButtonBase>
       <div className={classes.transitInfoTitle}>
         <Typography className={classes.bold}>
@@ -104,7 +107,9 @@ const TransitStopInfo = ({ stop, onCloseClick, classes }) => {
         </Typography>
         {getAccessibilityIcon(stopData.wheelchair)}
       </div>
-      {renderDepartureTimes()}
+      {type === 'bikeStation'
+        ? null
+        : renderDepartureTimes()}
     </div>
   );
 };
@@ -113,10 +118,12 @@ TransitStopInfo.propTypes = {
   stop: PropTypes.objectOf(PropTypes.any),
   onCloseClick: PropTypes.func.isRequired,
   classes: PropTypes.objectOf(PropTypes.any).isRequired,
+  type: PropTypes.string,
 };
 
 TransitStopInfo.defaultProps = {
   stop: {},
+  type: null,
 };
 
 export default TransitStopInfo;

@@ -1,15 +1,11 @@
 /* eslint-disable camelcase */
-import React, { useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import UnitHelper from '../../../utils/unitHelper';
 import ResultItem from '../ResultItem';
 import SettingsUtility from '../../../utils/settings';
 import UnitIcon from '../../SMIcon/UnitIcon';
 import isClient from '../../../utils';
-import locationIcon from '../../../assets/icons/LocationDefault.svg';
-import locationIconHover from '../../../assets/icons/LocationHover.svg';
-import locationIconContrast from '../../../assets/icons/LocationDefaultContrast.svg';
-import locationIconContrastHover from '../../../assets/icons/LocationHoverContrast.svg';
 import useLocaleText from '../../../utils/useLocaleText';
 
 const UnitItem = ({
@@ -22,7 +18,7 @@ const UnitItem = ({
   divider,
   navigator,
   settings,
-  theme,
+  simpleItem,
 }) => {
   const getLocaleText = useLocaleText();
 
@@ -50,42 +46,6 @@ const UnitItem = ({
   // Parse unit data
   const { id, name } = unit;
 
-  const resetMarkerHighlight = () => {
-    // Handle marker highlight removal
-    const marker = document.querySelector(`.unit-marker-${id}`);
-    if (!marker) {
-      return;
-    }
-    marker.classList.remove('markerHighlighted');
-    if (marker.nodeName === 'IMG') {
-      const icon = theme === 'dark' ? locationIconContrast : locationIcon;
-      marker.setAttribute('src', icon);
-    }
-  };
-
-  useEffect(() => () => {
-    // Remove highlights on unmount
-    resetMarkerHighlight();
-  }, []);
-
-  const onMouseEnter = () => {
-    // Handle marker highlighting
-    const marker = document.querySelector(`.unit-marker-${id}`);
-    if (marker) {
-      marker.classList.add('markerHighlighted');
-      if (marker.nodeName === 'IMG') {
-        const icon = theme === 'dark' ? locationIconContrastHover : locationIconHover;
-        marker.setAttribute('src', icon);
-      }
-    }
-  };
-
-  const onMouseLeave = () => {
-    // Reset marker highlighting
-    resetMarkerHighlight();
-  };
-
-
   // Don't render if not valid unit
   if (!UnitHelper.isValidUnit(unit)) {
     return null;
@@ -106,32 +66,53 @@ const UnitItem = ({
       : intl.formatMessage({ id: 'general.distance.kilometers' })}`,
   } : {};
 
+  if (!simpleItem) {
+    return (
+      <ResultItem
+        title={getLocaleText(name)}
+        subtitle={contractText}
+        bottomText={accessText}
+        bottomHighlight={problemCount !== null && typeof problemCount !== 'undefined'}
+        extendedClasses={{
+          typography: {
+            title: classes.title,
+          },
+        }}
+        distance={distanceText}
+        icon={icon}
+        onClick={(e) => {
+          e.preventDefault();
+          if (onClick) {
+            onClick();
+          } else if (navigator) {
+            navigator.push('unit', { id });
+          }
+        }}
+        unitId={id}
+        padded={padded}
+        divider={divider}
+      />
+    );
+  }
   return (
     <ResultItem
       title={getLocaleText(name)}
-      subtitle={contractText}
-      bottomText={accessText}
-      bottomHighlight={problemCount !== null && typeof problemCount !== 'undefined'}
+      simpleItem={simpleItem}
       extendedClasses={{
         typography: {
           title: classes.title,
         },
       }}
       distance={distanceText}
-      icon={icon}
       onClick={(e) => {
         e.preventDefault();
         if (onClick) {
           onClick();
-        } else if (navigator) {
-          navigator.push('unit', { id });
+        } else {
+          UnitHelper.unitElementClick(navigator, unit);
         }
       }}
-      onFocus={onMouseEnter}
-      onBlur={onMouseLeave}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      padded={padded}
+      unitId={id}
       divider={divider}
     />
   );
@@ -154,7 +135,7 @@ UnitItem.propTypes = {
   settings: PropTypes.objectOf(PropTypes.any).isRequired,
   padded: PropTypes.bool,
   divider: PropTypes.bool,
-  theme: PropTypes.oneOf(['dark', 'default']).isRequired,
+  simpleItem: PropTypes.bool,
 };
 
 UnitItem.defaultProps = {
@@ -164,4 +145,5 @@ UnitItem.defaultProps = {
   navigator: null,
   padded: false,
   divider: true,
+  simpleItem: false,
 };

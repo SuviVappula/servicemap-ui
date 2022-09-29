@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import { IconButton, Typography, Button } from '@material-ui/core';
-import { ArrowBack } from '@material-ui/icons';
+import {
+  IconButton, Typography, Button, ButtonBase,
+} from '@mui/material';
+import { ArrowBack } from '@mui/icons-material';
 import { getPathName } from '../../utils/path';
 
 const BackButton = (props) => {
@@ -17,9 +18,9 @@ const BackButton = (props) => {
     navigator,
     srHidden,
     ariaLabel,
+    text,
     focusVisibleClassName,
   } = props;
-
   // Generate dynamic text
   // Figure out correct translation id suffix
   let idSuffix = 'goToHome';
@@ -43,13 +44,17 @@ const BackButton = (props) => {
   const textId = `general.back.${idSuffix}`;
   const defaultMessage = intl.formatMessage({ id: 'general.back' });
   const buttonText = intl.formatMessage({ id: textId, defaultMessage });
+  // Set button text as state, so that it does not change
+  const [buttonTitle] = useState(buttonText);
+  let classNames = 'SMBackButton';
 
 
   if (variant === 'icon') {
+    classNames += ` ${className}`;
     return (
       <IconButton
         role="link"
-        className={className}
+        className={classNames}
         style={style}
         aria-hidden={srHidden}
         aria-label={ariaLabel || buttonText}
@@ -63,33 +68,34 @@ const BackButton = (props) => {
           }
         }}
       >
-        <ArrowBack />
+        <ArrowBack fontSize="inherit" />
       </IconButton>
     );
   }
 
   if (variant === 'container') {
+    classNames += ` ${classes.containerButton} ${className}`;
     return (
-      <div className={`${classes.flexRow} ${classes.container}`}>
-        <IconButton
-          role="link"
-          className={`${classes.containerButton} ${className}`}
-          style={style}
-          aria-hidden={srHidden}
-          aria-label={ariaLabel || buttonText}
-          onClick={(e) => {
-            e.preventDefault();
-            if (onClick) {
-              onClick(e);
-            } else if (navigator) {
-              navigator.goBack();
-            }
-          }}
-        >
-          <ArrowBack />
-        </IconButton>
-        <Typography aria-hidden className={`${classes.containerText}`} color="inherit" variant="body2"><FormattedMessage id="general.backTo" /></Typography>
-      </div>
+      <ButtonBase
+        role="link"
+        className={classNames}
+        style={style}
+        aria-hidden={srHidden}
+        aria-label={ariaLabel || buttonTitle}
+        onClick={(e) => {
+          e.preventDefault();
+          if (onClick) {
+            onClick(e);
+          } else if (navigator) {
+            navigator.goBack();
+          }
+        }}
+      >
+        <ArrowBack fontSize="inherit" />
+        <Typography aria-hidden className={`${classes.containerText}`} fontSize="inherit" color="inherit" variant="body2">
+          {text || buttonTitle}
+        </Typography>
+      </ButtonBase>
     );
   }
 
@@ -97,6 +103,7 @@ const BackButton = (props) => {
     <Button
       aria-hidden={srHidden}
       aria-label={ariaLabel || buttonText}
+      className={classNames}
       role="link"
       variant="contained"
       color="primary"
@@ -127,6 +134,7 @@ BackButton.propTypes = {
   variant: PropTypes.oneOf(['container', 'icon', null]),
   srHidden: PropTypes.bool,
   ariaLabel: PropTypes.string,
+  text: PropTypes.string,
   focusVisibleClassName: PropTypes.string,
 };
 
@@ -138,6 +146,7 @@ BackButton.defaultProps = {
   variant: null,
   srHidden: false,
   ariaLabel: null,
+  text: null,
   focusVisibleClassName: null,
 };
 

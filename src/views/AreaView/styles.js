@@ -15,12 +15,6 @@ const styles = theme => ({
     textAlign: 'start',
     display: 'flex',
   },
-  deleteLink: {
-    fontSize: 14,
-    color: '#3344dd',
-    textDecoration: 'underline',
-    marginLeft: theme.spacing(1),
-  },
   list: {
     paddingLeft: 10,
   },
@@ -104,11 +98,7 @@ const styles = theme => ({
     boxShadow: `0 0 0 4px ${theme.palette.focusBorder.main}`,
   },
   addressItem: {
-    fontSize: 24,
-  },
-  divisionItem: {
-    paddingTop: 14,
-    paddingBottom: 14,
+    fontSize: '1.5rem',
   },
   areaTitle: {
     display: 'flex',
@@ -125,7 +115,7 @@ const styles = theme => ({
     fontSize: 24,
   },
   selectedAddress: {
-    fontSize: 18,
+    fontSize: '1.125rem',
   },
   subdistrictContainer: {
     flexDirection: 'column',
@@ -191,6 +181,10 @@ const styles = theme => ({
   },
   areaSwitch: {
     paddingLeft: theme.spacing(2),
+    display: 'inline-flex',
+    alignItems: 'center',
+    marginLeft: -11,
+    verticalAlign: 'middle',
   },
   labelContainer: {
     marginLeft: theme.spacing(2),

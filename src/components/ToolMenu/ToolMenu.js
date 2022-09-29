@@ -4,13 +4,13 @@ import { useLocation } from 'react-router-dom';
 import URI from 'urijs';
 import {
   Build, Code, GetApp, Print,
-} from '@material-ui/icons';
+} from '@mui/icons-material';
 import { useSelector } from 'react-redux';
 import DropDownMenuButton from '../DropDownMenuButton';
 import SMIcon from '../SMIcon/SMIcon';
-import SMButton from '../ServiceMapButton';
 import PrintContext from '../../context/PrintContext';
 import DownloadDialog from '../Dialog/DownloadDialog';
+import MeasuringStopButton from './MeasuringStopButton';
 
 const ToolMenuButtonID = 'ToolMenuButton';
 
@@ -26,7 +26,12 @@ const ToolMenu = ({
   const getAreaViewParams = () => {
     // Form url with parameters when user clicks embedder from tool menu
     const {
-      districtAddressData, selectedDistrictType, selectedSubdistricts, selectedDistrictServices,
+      districtAddressData,
+      selectedDistrictType,
+      selectedSubdistricts,
+      selectedDistrictServices,
+      selectedParkingAreas,
+      parkingUnits,
     } = districtState;
     const selected = selectedDistrictType
       ? `selected=${selectedDistrictType}` : null;
@@ -34,6 +39,10 @@ const ToolMenu = ({
       ? `districts=${selectedSubdistricts.map(i => i).toString()}` : null;
     const services = selectedDistrictServices.length
       ? `services=${selectedDistrictServices}` : null;
+    const parkingSpaces = selectedParkingAreas.length
+      ? `parkingSpaces=${selectedParkingAreas.join(',')}` : null;
+    const units = parkingUnits.length
+      ? 'parkingUnits=true' : null;
     const addressCoordinates = districtAddressData.address
       ? `lat=${districtAddressData.address.location.coordinates[1]}&lng=${districtAddressData.address.location.coordinates[0]}` : null;
 
@@ -41,6 +50,8 @@ const ToolMenu = ({
       ...(selected ? [selected] : []),
       ...(districts ? [districts] : []),
       ...(services ? [services] : []),
+      ...(parkingSpaces ? [parkingSpaces] : []),
+      ...(units ? [units] : []),
       ...(addressCoordinates ? [addressCoordinates] : []),
     ];
     if (params.length) {
@@ -59,9 +70,6 @@ const ToolMenu = ({
 
     const uri = URI(window.location);
     const search = uri.search(true);
-    if (!search.bbox) {
-      search.bbox = mapUtility.getBbox();
-    }
     uri.search(search);
     let searchParams = uri.search();
 
@@ -82,6 +90,7 @@ const ToolMenu = ({
     // Example shape
     {
       key: 'embedder.title',
+      id: 'EmbedderToolMenuButton',
       text: intl.formatMessage({ id: 'embedder.title' }),
       icon: <Code />,
       onClick: () => {
@@ -91,6 +100,7 @@ const ToolMenu = ({
     },
     {
       key: 'downloadTool',
+      id: 'DownloadToolMenuButton',
       text: intl.formatMessage({ id: 'tool.download' }),
       icon: <GetApp />,
       onClick: () => {
@@ -99,7 +109,8 @@ const ToolMenu = ({
     },
     {
       key: 'printTool',
-      text: intl.formatMessage({ id: 'tool.print'}),
+      id: 'PrintToolMenuButton',
+      text: intl.formatMessage({ id: 'tool.print' }),
       icon: <Print className={classes.smIcon} />,
       onClick: () => {
         if (typeof togglePrintView === 'function') {
@@ -109,9 +120,10 @@ const ToolMenu = ({
     },
     {
       key: 'measuringTool',
+      id: 'MesuringToolMenuButton',
       text: measuringMode ? intl.formatMessage({ id: 'tool.measuring.stop' }) : intl.formatMessage({ id: 'tool.measuring' }),
       icon: <SMIcon className={classes.smIcon} icon="icon-icon-measuring-tool" />,
-      ariaHidden: true,
+      ariaHidden: false,
       onClick: () => {
         setMeasuringMode(!measuringMode);
       },
@@ -136,14 +148,7 @@ const ToolMenu = ({
         menuItems={menuItems}
       />
       {measuringMode && (
-        <SMButton
-          aria-hidden="true"
-          className={classes.measuringButton}
-          color="primary"
-          role="button"
-          messageID="tool.measuring.stop"
-          onClick={() => setMeasuringMode(false)}
-        />
+        <MeasuringStopButton onClick={() => setMeasuringMode(false)} />
       )}
       <DownloadDialog open={openDownload} setOpen={setOpenDownload} referer={toolMenuButton} />
     </>

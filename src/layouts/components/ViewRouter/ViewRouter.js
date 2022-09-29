@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Switch, Route, withRouter } from 'react-router-dom';
+import { Switch, Route } from 'react-router-dom';
 import SearchView from '../../../views/SearchView';
 import UnitView from '../../../views/UnitView';
 import HomeView from '../../../views/HomeView';
@@ -15,6 +15,7 @@ import DivisionView from '../../../views/DivisionView';
 import InfoView from '../../../views/InfoView';
 import ExtendedData from '../../../views/UnitView/components/ExtendedData';
 import AreaView from '../../../views/AreaView';
+import { ErrorTrigger } from '../../../components';
 
 const TitleWrapper = ({ children, messageId }) => (
   <>
@@ -54,16 +55,13 @@ const Home = () => (
   </TitleWrapper>
 );
 
-const Search = withRouter(({ location }) => {
-  const query = new URLSearchParams(location.search).get('q'); // Get query parameter
-  return (
-    <TitleWrapper messageId="general.pageTitles.search">
-      <PageWrapper headMsgId="search.results.title" page="search">
-        <SearchView query={query} />
-      </PageWrapper>
-    </TitleWrapper>
-  );
-});
+const Search = () => (
+  <TitleWrapper messageId="general.pageTitles.search">
+    <PageWrapper headMsgId="search.results.title" page="search">
+      <SearchView />
+    </PageWrapper>
+  </TitleWrapper>
+);
 
 const Unit = () => (
   <TitleWrapper messageId="general.pageTitles.unit">
@@ -73,23 +71,37 @@ const Unit = () => (
   </TitleWrapper>
 );
 
+const UnitServices = () => (
+  <TitleWrapper messageId="general.pageTitles.unit.services">
+    <PageWrapper headMsgId="general.pageTitles.unit.services" page="unit">
+      <ExtendedData type="services" />
+    </PageWrapper>
+  </TitleWrapper>
+);
+const UnitEducationServices = () => (
+  <TitleWrapper messageId="general.pageTitles.unit.services">
+    <PageWrapper headMsgId="general.pageTitles.unit.services" page="unit">
+      <ExtendedData type="educationServices" />
+    </PageWrapper>
+  </TitleWrapper>
+);
 const UnitEvents = () => (
   <TitleWrapper messageId="general.pageTitles.unit.events">
-    <PageWrapper headMsgId="" page="unit">
+    <PageWrapper headMsgId="general.pageTitles.unit.events" page="unit">
       <ExtendedData type="events" />
     </PageWrapper>
   </TitleWrapper>
 );
 const UnitReservations = () => (
   <TitleWrapper messageId="general.pageTitles.unit.reservations">
-    <PageWrapper headMsgId="" page="unit">
+    <PageWrapper headMsgId="general.pageTitles.unit.reservations" page="unit">
       <ExtendedData type="reservations" />
     </PageWrapper>
   </TitleWrapper>
 );
 const UnitFeedback = () => (
   <TitleWrapper messageId="general.pageTitles.feedback">
-    <PageWrapper headMsgId="" page="unit">
+    <PageWrapper headMsgId="general.pageTitles.feedback" page="unit">
       <FeedbackView />
     </PageWrapper>
   </TitleWrapper>
@@ -121,7 +133,7 @@ const Address = () => (
 
 const ServiceTree = () => (
   <TitleWrapper messageId="general.pageTitles.serviceTree">
-    <PageWrapper headMsgId="general.pageTitles.serviceTree" page="serviceTree">
+    <PageWrapper headMsgId="general.pageTitles.serviceTree.title" page="serviceTree">
       <ServiceTreeView />
     </PageWrapper>
   </TitleWrapper>
@@ -129,7 +141,7 @@ const ServiceTree = () => (
 
 const Info = () => (
   <TitleWrapper messageId="general.pageTitles.info">
-    <PageWrapper headMsgId="" page="info">
+    <PageWrapper headMsgId="general.pageTitles.info" page="info">
       <InfoView />
     </PageWrapper>
   </TitleWrapper>
@@ -137,7 +149,7 @@ const Info = () => (
 
 const Feedback = () => (
   <TitleWrapper messageId="general.pageTitles.feedback">
-    <PageWrapper headMsgId="" page="feedback">
+    <PageWrapper headMsgId="general.pageTitles.feedback" page="feedback">
       <FeedbackView />
     </PageWrapper>
   </TitleWrapper>
@@ -164,12 +176,14 @@ class ViewRouter extends React.Component {
         <Route exact path="/:lng/unit/:unit/feedback" component={UnitFeedback} />
         <Route exact path="/:lng/unit/:unit/events" component={UnitEvents} />
         <Route exact path="/:lng/unit/:unit/reservations" component={UnitReservations} />
+        <Route exact path="/:lng/unit/:unit/services" component={UnitServices} />
+        <Route exact path="/:lng/unit/:unit/educationServices/:period?" component={UnitEducationServices} />
         <Route exact path="/:lng/unit/:unit" component={Unit} />
         <Route path="/:lng/search" component={Search} />
         <Route path="/:lng/services" component={ServiceTree} />
         <Route path="/:lng/service/:service" component={Service} />
         <Route path="/:lng/event/:event" component={Event} />
-        <Route path="/:lng/address/:municipality/:street/:number" component={Address} />
+        <Route path="/:lng/address/:municipality/:street" component={Address} />
         <Route exact path="/:lng/feedback/" component={Feedback} />
         <Route exact path="/:lng/area/" component={Area} />
         <Route
@@ -183,7 +197,8 @@ class ViewRouter extends React.Component {
           )}
         />
         <Route path="/:lng/info/:page?" component={Info} />
-        <Route path="/:lng/" component={Home} />
+        <Route exact path="/:lng/" component={Home} />
+        <Route render={props => <ErrorTrigger error="badUrl" />} />
       </Switch>
     );
   }
